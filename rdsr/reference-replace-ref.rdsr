@@ -1,0 +1,5 @@
+@reference-replace 'reference-replace-master';
+
+body {
+	background-color: red;
+}

@@ -1,4 +1,144 @@
 <?php
+function getReferenceReplace($settings)
+{
+	$content = $settings['content'];
+	$css_list = $settings['css_list'];
+
+	
+	preg_match_all('/(\@reference-replace+[\s]+[\'\"]+[a-zA-Z0-9\-\_]+[\'\"]+\;+$)/m', $content, $matches);
+
+	//print('<pre>'.print_r($matches,true).'</pre>');
+
+	foreach($matches[0] as $content_matches)
+	{
+		$exp_con = explode('@reference-replace',$content_matches);
+		$file_inc = $exp_con[1];
+		$file_inc = str_replace('"','',$file_inc);	
+		$file_inc = str_replace("'",'',$file_inc);	
+		$file_inc = str_replace(";",'',$file_inc);
+		$filename = trim($file_inc);
+		$file_inc = trim($file_inc).'.rdsr';
+
+		$content = str_replace($content_matches,'',$content);	
+		
+		$ref_con = cssToArray(['content'=>$content]);
+		$master_con = cssToArray(['content'=>$css_list[$file_inc]]);
+
+		foreach($master_con as $level => $value)
+		{
+			foreach($master_con[$level] as $classname => $value)
+			{
+				if(isset($ref_con[$level][$classname]))
+				{
+					//echo $ref_con[$level][$classname];
+					$master_con[$level][$classname] = $ref_con[$level][$classname];	
+				}
+			}			
+		}
+		//print_r($master_con);
+
+		//echo $master_con;
+		
+	}
+
+
+
+	//return array('variable'=>$content_vars,'content'=>$content);
+	if(isset($master_con))
+	{
+		return ['css_list'=>array($file_inc=>$master_con),'content'=>$content];	
+	}
+	else
+	{
+		return ['content'=>$content];
+	}
+	
+}
+
+function cssToArray($settings)
+{
+	$content = $settings['content'];
+	//get level 1
+	preg_match_all('/[^\s}{]+\s*{(?:[^}{]+|{[^}{]*})*}/m', $content, $matches);
+	foreach($matches[0] as $var)
+	{
+		$exp_var = explode('{',$var,2);
+		$classname = trim($exp_var[0]);
+
+		$exp = explode('}',$exp_var[1]);
+	    $last = array_pop($exp);
+	    $parts = array(implode('}', $exp), $last);
+		
+
+		$classcontent = $parts[0];
+
+		$content_list[1][$classname] = $classcontent;
+	}
+
+	//level 2
+	foreach($content_list[1] as $classname_parent => $var_parent)
+	{
+		preg_match_all('/[^\s}{]+\s*{(?:[^}{]+|{[^}{]*})*}/m', $var_parent, $matches);
+		foreach($matches[0] as $var)
+		{
+			$exp_var = explode('{',$var,2);
+			$classname = trim($exp_var[0]);
+
+			$exp = explode('}',$exp_var[1]);
+		    $last = array_pop($exp);
+		    $parts = array(implode('}', $exp), $last);
+			
+
+			$classcontent = $parts[0];
+
+			$content_list[2][$classname_parent][$classname] = $classcontent;
+		}	
+	}
+
+	return $content_list;
+}
+
+function arrayToCSS($settings)
+{
+	$content_list = $settings['content_array'];
+	$content_finalmix = '';
+	//parse
+	foreach($content_list[1] as $classname_parent => $var_parent)
+	{
+		if(isset($content_list[2][$classname_parent]))
+		{
+			if(count($content_list[2][$classname_parent]) > 0)
+			{
+				//nesting
+				foreach($content_list[2][$classname_parent] as $classname_child => $var_child)
+				{
+					$content_finalmix .= $classname_parent.' '.$classname_child;
+					$content_finalmix .= " {\n";
+					$content_finalmix .= $var_child."\n";
+					$content_finalmix .= " }\n";
+				}
+			}
+			else
+			{
+				$content_finalmix .= $classname_parent;
+				$content_finalmix .= " {\n";
+				$content_finalmix .= $var_parent."\n";
+				$content_finalmix .= " }\n";
+			}	
+		}
+		else
+		{
+			$content_finalmix .= $classname_parent;
+			$content_finalmix .= " {\n";
+			$content_finalmix .= $var_parent."\n";
+			$content_finalmix .= " }\n";
+		}	
+			
+	}
+
+	return $content_finalmix;
+}
+
 function getForeach($settings)
 {
 	$content = $settings['content'];

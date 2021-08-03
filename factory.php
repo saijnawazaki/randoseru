@@ -13,6 +13,17 @@ foreach($content_rdsr as $filename => $content)
 {
 	$content_vars = array();
 
+	$res = getReferenceReplace(['content'=>$content,'css_list'=>$content_rdsr_finalmix]);
+	$content = $res['content'];
+	if(isset($res['css_list']))
+	{
+		foreach($res['css_list'] as $fn => $val)
+		{
+			$content_rdsr_finalmix[$fn] = arrayToCSS(['content_array'=>$res['css_list'][$fn]]);	
+		}
+	}
+	
+
 	$res = getModules(['content'=>$content,'path'=>PATH_RDSR_FOLDER]);
 	$content = $res['content'];
 	$content_vars_partial = $res['variable'];
