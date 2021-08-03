@@ -1,0 +1,7 @@
+$color-primary: blue;
+$color-secondary : red;
+
+body {
+	color: $color-primary;
+	background-color: $color-secondary;
+}

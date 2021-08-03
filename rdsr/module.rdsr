@@ -1,0 +1,6 @@
+@use 'partial';
+
+.inverse {
+  background-color: partial.$primary-color;
+  color: white;
+}

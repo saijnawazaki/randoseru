@@ -1,0 +1,27 @@
+.info {
+
+  
+  background: DarkGray;
+  box-shadow: 0 0 1px rgba(DarkGray, .25);
+  color: #fff;
+
+
+ }
+.alert {
+
+  
+  background: DarkRed;
+  box-shadow: 0 0 1px rgba(DarkRed, .25);
+  color: #fff;
+
+
+ }
+.success {
+
+  
+  background: DarkGreen;
+  box-shadow: 0 0 1px rgba(DarkGreen, .25);
+  color: #fff;
+
+
+ }
